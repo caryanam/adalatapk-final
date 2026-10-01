@@ -1,0 +1,10 @@
+diff --git a/node_modules/@react-native-firebase/app/android/src/reactnative/java/io/invertase/firebase/app/generated/jni/CMakeLists.txt b/node_modules/@react-native-firebase/app/android/src/reactnative/java/io/invertase/firebase/app/generated/jni/CMakeLists.txt
+index 0f63f3d..bf9e8b2 100644
+--- a/node_modules/@react-native-firebase/app/android/src/reactnative/java/io/invertase/firebase/app/generated/jni/CMakeLists.txt
++++ b/node_modules/@react-native-firebase/app/android/src/reactnative/java/io/invertase/firebase/app/generated/jni/CMakeLists.txt
+@@ -25,4 +25,4 @@ target_link_libraries(
+   reactnative
+ )
+ 
+-target_compile_reactnative_options(react_codegen_RNFBAppTurboModules PRIVATE)
++# target_compile_reactnative_options(react_codegen_RNFBAppTurboModules PRIVATE)

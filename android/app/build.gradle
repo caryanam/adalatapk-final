@@ -78,6 +78,7 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.adalatapp"
+    externalNativeBuild { cmake { version "3.31.6" } }
     defaultConfig {
         applicationId "com.adalatapp"
         minSdkVersion rootProject.ext.minSdkVersion

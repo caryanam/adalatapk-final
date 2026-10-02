@@ -24,11 +24,36 @@ const LANGUAGES = [
   'English', 'Hindi', 'Marathi', 'Tamil', 'Telugu', 'Bengali', 'Gujarati', 'Kannada'
 ];
 
+const REVERSE_PRACTICE_AREA_MAP: { [key: string]: string } = {
+  'CRIMINAL_LAW': 'Criminal Law',
+  'FAMILY_LAW': 'Family Law & Divorce',
+  'PROPERTY_LAW': 'Property & Real Estate',
+  'CIVIL_DISPUTES': 'Civil Disputes & Recovery',
+  'CONSUMER_LAW': 'Consumer Disputes',
+  'EMPLOYMENT_LAW': 'Employment & Labor',
+  'CYBERCRIME': 'Cyber Crime & IT',
+  'BANKING_AND_FINANCE': 'Banking & Finance',
+  'CORPORATE_LAW': 'Corporate Law',
+  'MATRIMONIAL_MATTERS': 'Matrimonial Matters'
+};
+
+const REVERSE_LANGUAGE_MAP: { [key: string]: string } = {
+  'ENGLISH': 'English',
+  'HINDI': 'Hindi',
+  'MARATHI': 'Marathi',
+  'TAMIL': 'Tamil',
+  'TELUGU': 'Telugu',
+  'BENGALI': 'Bengali',
+  'GUJARATI': 'Gujarati',
+  'KANNADA': 'Kannada'
+};
+
 const LawyerRegisterWizardScreen = ({ navigation, route }: any) => {
   const { user, updateUser } = useAuth();
   const initialLawyerId = route.params?.lawyerId || user?.lawyerId || user?.id || '';
+  const initialStep = route.params?.step ? Number(route.params.step) : 2;
   
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [loading, setLoading] = useState(false);
   const [lawyerId, setLawyerId] = useState(initialLawyerId);
 
@@ -56,21 +81,33 @@ const LawyerRegisterWizardScreen = ({ navigation, route }: any) => {
           const res = await lawyerApi.getLawyerById(lawyerId);
           if (res.status === 'SUCCESS' && res.data) {
             const data = res.data;
-            if (data.barCouncilRegNumber) {
-              setProfData(prev => ({
-                ...prev,
-                barCouncilNumber: data.barCouncilRegNumber,
-                experienceYears: data.experienceYears?.toString() || '',
-                languages: data.languages || [],
-                practiceAreas: data.practiceAreas || []
-              }));
-            }
+            const barNum = data.barEnrollmentNumber || data.barCouncilRegNumber || '';
+            const expYears = data.experienceYears !== undefined && data.experienceYears !== null
+              ? data.experienceYears.toString()
+              : (data.yearsOfExperience !== undefined && data.yearsOfExperience !== null ? data.yearsOfExperience.toString() : '');
+            
+            const rawPracticeAreas: string[] = data.practiceAreas || [];
+            const mappedPracticeAreas = rawPracticeAreas.map(pa => REVERSE_PRACTICE_AREA_MAP[pa] || pa);
+
+            const rawLanguages: string[] = data.languages || [];
+            const mappedLanguages = rawLanguages.map(l => REVERSE_LANGUAGE_MAP[l] || l);
+
+            setProfData(prev => ({
+              ...prev,
+              barCouncilNumber: barNum || prev.barCouncilNumber,
+              experienceYears: expYears || prev.experienceYears,
+              education: data.education || prev.education,
+              location: data.location || prev.location,
+              languages: mappedLanguages.length > 0 ? mappedLanguages : prev.languages,
+              practiceAreas: mappedPracticeAreas.length > 0 ? mappedPracticeAreas : prev.practiceAreas,
+              bio: data.bio || prev.bio
+            }));
+
             if (data.consultationFee) setPricing(data.consultationFee.toString());
             if (data.upiId) setUpiId(data.upiId);
-            
-            // Auto-advance logic (simplified)
-            if (data.upiId) setCurrentStep(6);
-            else if (data.consultationFee) setCurrentStep(5);
+            if (data.profilePhotoUrl) {
+              setProfilePhoto({ uri: data.profilePhotoUrl });
+            }
           }
         } catch (e) {
           console.error('Failed to load progress', e);
